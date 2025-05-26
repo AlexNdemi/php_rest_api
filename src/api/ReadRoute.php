@@ -23,6 +23,13 @@ Class ReadRoute{
          header('Content-Type: application/json');
         return $this->postsView->getAllPosts();
     }
+    #[attributes\Route(route:"/read/{id}")]
+    public function readSinglePost (string $id) {
+    header('Access-Control-Allow-Origin: *');
+    header('Content-Type: application/json');
+    return $this->postsView->getSinglePost($id);
+    }
+    
 }
 
 

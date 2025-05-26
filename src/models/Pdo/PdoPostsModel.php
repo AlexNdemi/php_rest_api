@@ -42,4 +42,15 @@ Class PdoPostsModel implements PostsModelContract{
 
     return $posts;
   }
+  public function getPostByIdTitleOrAuthor(string $id):array{
+       $post = [];
+       $posts = $this->read();
+       foreach($posts as $singlePost){
+        $postmatcher = [$singlePost['id'],$singlePost['title'],$singlePost['author']];
+         if(in_array($id,$postmatcher )){
+          $post[]=$singlePost;
+         }
+       }
+       return $post;
+  }
 }

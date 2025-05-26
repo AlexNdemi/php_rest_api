@@ -17,4 +17,13 @@ Class PostsView {
     // http_response_code(200);
     // echo json_encode(['data' => $posts]);
   }
+  public function getSinglePost(string $id){
+    $post =$this ->model->getPostByIdTitleOrAuthor( $id);
+    if (empty($post)) {
+        http_response_code(404);
+        echo json_encode(['message' => 'No posts found']);
+        return;
+    }
+    \src\core\JsonResponse::success($post);
+  }
 }

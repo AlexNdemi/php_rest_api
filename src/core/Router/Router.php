@@ -52,7 +52,20 @@ class Router{
   }
   public function resolve(string $requestUri,string $requestMethod){
     $route = \explode('?',$requestUri)[0];
-    $action = $this->routes[$requestMethod][$route] ?? null;
+    // $action = $this->routes[$requestMethod][$route] ?? null;
+    $action = null;
+    $params=[];
+    foreach($this->routes[$requestMethod] as $routePattern=>$routeAction){
+      $pattern= preg_replace("#\{[\w]+\}#",'([\w-]+)',$routePattern);
+      $pattern = "#^".$pattern."$#";
+      if(preg_match($pattern,$route,$matches)){
+        array_shift($matches);
+        $action = $routeAction;
+        $params = $matches;
+        break;
+      }
+
+    }
     if(!$action){
       throw new \src\exceptions\RouteNotFoundException();
     }
@@ -69,10 +82,10 @@ class Router{
     }
     [$class,$method,$ClassConstructorArgs,$methodArgs]=$action;
 
-    $this->invokeClassMethod(class: $class,method: $method, constructorArgs: $ClassConstructorArgs,methodArgs: $methodArgs);
+    $this->invokeClassMethod(class: $class,method: $method, constructorArgs: $ClassConstructorArgs,methodArgs: $methodArgs,params:$params);
   }
 
-  private function invokeClassMethod(string $class, string $method, array $constructorArgs, array $methodArgs): void {
+  private function invokeClassMethod(string $class, string $method, array $constructorArgs, array $methodArgs,$params): void {
     if (!class_exists($class)) {
         throw new exceptions\ClassNotFoundException("Class {$class} not found.");
     }
@@ -99,7 +112,7 @@ class Router{
         throw new exceptions\MethodNotFoundException("Method {$method} not found in class {$class}.");
     }
 
-    $result = call_user_func_array([$instance, $method], $methodArgs);
+    $result = call_user_func_array([$instance, $method], [...$params,...$methodArgs]);
 
     if (is_array($result) || is_object($result)) {
     echo json_encode($result);
