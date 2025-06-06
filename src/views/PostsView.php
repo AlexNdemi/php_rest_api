@@ -26,4 +26,7 @@ Class PostsView {
     }
     \src\core\JsonResponse::success($post);
   }
+  public function createPost(){
+    
+  }
 }

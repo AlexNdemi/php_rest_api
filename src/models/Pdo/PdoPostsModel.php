@@ -42,15 +42,32 @@ Class PdoPostsModel implements PostsModelContract{
 
     return $posts;
   }
-  public function getPostByIdTitleOrAuthor(string $id):array{
-       $post = [];
-       $posts = $this->read();
-       foreach($posts as $singlePost){
-        $postmatcher = [$singlePost['id'],$singlePost['title'],$singlePost['author']];
-         if(in_array($id,$postmatcher )){
-          $post[]=$singlePost;
-         }
-       }
-       return $post;
+  public function getPostByIdTitleOrAuthor(string $term):array{
+        $sql = "SELECT * FROM posts 
+            WHERE id = :exactId 
+               OR LOWER(title) LIKE :pattern 
+               OR LOWER(author) LIKE :pattern";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':exactId' => $term,
+            ':pattern' => '%' . strtolower($term) . '%'
+        ]);
+
+        return $stmt->fetchAll();
+  }
+  public function create(string $category_id,string $title,string $body,string $author):void{
+    $sql = "INSERT INTO {$this->table} (category_id,title,body,author) VALUES(:category_id,:title,:body,:author)";
+
+    $stmt = $this->conn->prepare($sql);
+
+    $stmt->execute([
+      'category_id' => $category_id,
+      'title' => $title,
+      'body' => $body,
+      'author' => $author
+    ]);
+
+
   }
 }

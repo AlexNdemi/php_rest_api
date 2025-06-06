@@ -50,18 +50,18 @@ class Router{
     } ;
 
   }
-  public function resolve(string $requestUri,string $requestMethod){
+  public function resolve(string $requestUri,string $requestMethod,array $queryParams = []){
     $route = \explode('?',$requestUri)[0];
     // $action = $this->routes[$requestMethod][$route] ?? null;
     $action = null;
     $params=[];
     foreach($this->routes[$requestMethod] as $routePattern=>$routeAction){
-      $pattern= preg_replace("#\{[\w]+\}#",'([\w-]+)',$routePattern);
-      $pattern = "#^".$pattern."$#";
+      $pattern= preg_replace("#\{[\w]+\}#",'([^/]+)',$routePattern);
+      $pattern = "#^$pattern$#";
       if(preg_match($pattern,$route,$matches)){
         array_shift($matches);
         $action = $routeAction;
-        $params = $matches;
+        $params = array_map('rawurldecode', $matches);
         break;
       }
 
@@ -81,11 +81,12 @@ class Router{
       throw new exceptions\IsNotArrayException();
     }
     [$class,$method,$ClassConstructorArgs,$methodArgs]=$action;
+    
 
-    $this->invokeClassMethod(class: $class,method: $method, constructorArgs: $ClassConstructorArgs,methodArgs: $methodArgs,params:$params);
+    $this->invokeClassMethod(class: $class,method: $method, constructorArgs: $ClassConstructorArgs,methodArgs: $methodArgs,params:$params,queryParams:$queryParams);
   }
 
-  private function invokeClassMethod(string $class, string $method, array $constructorArgs, array $methodArgs,$params): void {
+  private function invokeClassMethod(string $class, string $method, array $constructorArgs, array $methodArgs,$params,$queryParams): void {
     if (!class_exists($class)) {
         throw new exceptions\ClassNotFoundException("Class {$class} not found.");
     }
@@ -104,20 +105,17 @@ class Router{
       );
 
       $instance = $this->container->get($class);
-      echo "" ;
-
     }
 
     if (!method_exists($instance, $method)) {
         throw new exceptions\MethodNotFoundException("Method {$method} not found in class {$class}.");
     }
 
-    $result = call_user_func_array([$instance, $method], [...$params,...$methodArgs]);
+    $result = call_user_func_array([$instance, $method], [...$params,...$methodArgs,$queryParams]);
 
     if (is_array($result) || is_object($result)) {
     echo json_encode($result);
-    } elseif (is_string($result)) {
-    echo $result; // plain text, if needed
+    } elseif (is_string($result)) { // plain text, if needed
     }
 }
   public function parseClassArg( array $classArg){                           
