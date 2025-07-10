@@ -1,7 +1,7 @@
 <?php
 namespace config;
 Class Config{
-  protected array $config;
+  protected array $config=[];
  public function __construct(public array $env){
     $this->config=[
        "db"=>[
@@ -9,7 +9,8 @@ Class Config{
         "DATABASE_USERNAME" => $env["DATABASE_USERNAME"],
         "DATABASE_PASSWORD" => $env["DATABASE_PASSWORD"],
         "DATABASE_NAME" => $env["DATABASE_NAME"]
-        ]
+       ],
+       "JWT_SECRET" =>$env["JWT_SECRET"]
     ];
 
  }

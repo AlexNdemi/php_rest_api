@@ -4,6 +4,7 @@ namespace src\api;
 
 use src\views\PostsView;
 use src\attributes;
+use src\core;
 
 #[attributes\RouteConstructor(classArgs: [
     [
@@ -19,19 +20,13 @@ Class ReadRoute{
     
     #[attributes\Route(route: "/read")]
     public function read(array $queryParams = []){
-         header('Access-Control-Allow-Origin: *');
-         header('Content-Type: application/json');
+         core\JsonResponse::sendCorsHeaders(allowedMethods:['GET']);
 
         $name = $queryParams['name'] ?? null;
-        $title = $queryParams['title'] ?? null;
         $author = $queryParams['author'] ?? null;
 
         if ($name) {
             return $this->postsView->getSinglePost($name);
-        }
-
-        if ($title) {
-            return $this->postsView->getSinglePost($title);
         }
 
         if ($author) {
@@ -44,8 +39,7 @@ Class ReadRoute{
     
     #[attributes\Route(route:"/read/{id}")]
     public function readSinglePost (string $id,array $queryParams = []) {
-    header('Access-Control-Allow-Origin: *');
-    header('Content-Type: application/json');
+    core\JsonResponse::sendCorsHeaders(allowedMethods:['GET']);
     return $this->postsView->getSinglePost($id);
     }
     

@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace src\api;
+
 use src\attributes;
 use src\controllers\PostsController;
 use src\core\JsonResponse;
@@ -13,31 +14,29 @@ use src\core\AuthMiddleware;
   ]
    )
 ]
+class UpdateRoute{
+  public function __construct(private PostsController $postsController){       
+  }
 
-Class CreateRoute{
-    public function __construct(private PostsController $postsController){       
-    }
-
-    #[attributes\Post(route:"/create")]
-
-    public function create(){
-      JsonResponse::sendCorsHeaders(['POST']);
-
-    $user = AuthMiddleware::auth();
-    // Read JSON input
+   #[attributes\Put(route:"/update/{id}")]
+    public function create(string $id){
+      JsonResponse::sendCorsHeaders(['PUT']);
+      
+      $user = AuthMiddleware::auth();
       $data = json_decode(file_get_contents("php://input"), true);
 
       if (!is_array($data)) {
         JsonResponse::error("Invalid JSON input.");
         return;
-     }
+      }
 
       if (
       !$this->noEmptyInputs($data)
       ) {
         return;
       }
-        $this->postsController->createPost(
+        $this->postsController->updatePost(
+        id:$id,
         category_id: $data['category_id'],
         title: $data['title'],
         body: $data['body'],
@@ -46,22 +45,24 @@ Class CreateRoute{
 
         JsonResponse::success([
           'success'=>true,
-          'message'=>'Post created successfully'
+          'message'=>'Post updated successfully'
         ]);
       }
 
        private function noEmptyInputs(array $data): bool
-        {
+       {
             $errors = [];
             $normalized = [
-                'category_id' => $data['category_id'] ?? '',
-                'title' => $data['title'] ?? '',
-                'body' => $data['body'] ?? '',
-                'author' => $data['author'] ?? ''
+            'category_id' => $data['category_id'] ?? '',
+            'title' => $data['title'] ?? '',
+            'body' => $data['body'] ?? '',
+            'author' => $data['author'] ?? ''
             ];
+
             if (trim($normalized['title']) === '') {
                 $errors['title'] = '';
             }
+
             if (trim($normalized['body']) === '') {
                 $errors['body'] = '';
             }
@@ -81,13 +82,5 @@ Class CreateRoute{
             }
 
             return true;
-        }
-
-
-      
-    }
-
-   
-
-
-    
+       }
+}

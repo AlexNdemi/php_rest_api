@@ -1,7 +1,7 @@
 <?php
 namespace src\controllers;
 use src\interfaces;
-use src\interfaces\PostControllerContract;
+use src\core\JsonResponse;
 Class PostsController {
    private $model;
   public function __construct(interfaces\PostsModelContract $model){
@@ -26,5 +26,27 @@ Class PostsController {
         $cleaned['author']
     );
   } 
+
+  public function updatePost(string $id,string $category_id,string $title,string $body,string $author){
+    $cleaned = [
+         'id'=> (int) $this->clean($id),
+        'category_id' => $this->clean($category_id),
+        'title' => $this->clean($title),
+        'body' => $this->clean($body),
+        'author' => $this->clean($author)
+    ];
+    $this->model->update(
+        id: $cleaned['id'],
+        category_id: $cleaned['category_id'],
+        title: $cleaned['title'],
+        body: $cleaned['body'],
+        author: $cleaned['author']
+    );
+  }
+
+  public function delete (string $id): void{ 
+    $idOfPostToDelete = (int) $id;
+    $this->model->Delete(id: $idOfPostToDelete);
+  }
   
 }

@@ -42,10 +42,19 @@ Class PdoPostsModel implements PostsModelContract{
 
     return $posts;
   }
-  public function getPostByIdTitleOrAuthor(string $term):array{
-        $sql = "SELECT * FROM posts 
-            WHERE id = :exactId 
-               OR LOWER(title) LIKE :pattern 
+  public function getPostByIdOrAuthor(string $term):array{
+        $sql = "SELECT 
+                  c.name as category_name,
+                  p.id,
+                  p.category_id,
+                  p.title,
+                  p.body,
+                  p.author,
+                  p.created_at
+        FROM {$this->table} AS p
+        LEFT JOIN
+          categories AS c on p.category_id = c.id
+            WHERE p.id = :exactId  
                OR LOWER(author) LIKE :pattern";
 
         $stmt = $this->conn->prepare($sql);
@@ -69,5 +78,27 @@ Class PdoPostsModel implements PostsModelContract{
     ]);
 
 
+  }
+  public function update(int $id,string $category_id,string $title,string $body,string $author): void{
+     $sql = "UPDATE {$this->table} SET category_id = :category_id,title = :title,body = :body,author = :author WHERE id = :id";
+
+     $stmt = $this->conn->prepare($sql);
+     $stmt->execute([
+      'category_id' => $category_id,
+      'title' => $title,
+      'body' => $body,
+      'author' => $author,
+      'id' => $id
+    ]);
+
+  }
+  public function Delete (int $id):void{
+     $sql = "DELETE FROM {$this->table} WHERE id = :id";
+
+     $stmt = $this->conn->prepare($sql);
+
+     $stmt->execute([
+      'id' => $id
+    ]);
   }
 }

@@ -18,7 +18,7 @@ Class PostsView {
     // echo json_encode(['data' => $posts]);
   }
   public function getSinglePost(string $id){
-    $post =$this ->model->getPostByIdTitleOrAuthor( $id);
+    $post =$this ->model->getPostByIdOrAuthor( $id);
     if (empty($post)) {
         http_response_code(404);
         echo json_encode(['message' => 'No posts found']);
@@ -26,7 +26,6 @@ Class PostsView {
     }
     \src\core\JsonResponse::success($post);
   }
-  public function createPost(){
-    
-  }
+
+  
 }
